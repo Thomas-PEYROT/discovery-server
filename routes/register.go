@@ -2,6 +2,7 @@ package routes
 
 import (
 	"discovery-server/dto"
+	"discovery-server/exceptions"
 	"discovery-server/globals"
 	"discovery-server/services"
 	"encoding/json"
@@ -31,13 +32,18 @@ func RegisterMicroservice(w http.ResponseWriter, r *http.Request) {
 		globals.RegisteredMicroservices[body.Name] = make(map[string]globals.MicroserviceInstance)
 	}
 
+	newPort, err := services.GetNewPort()
+	if err != nil {
+		json.NewEncoder(w).Encode(exceptions.HttpException{Message: err.Error(), StatusCode: http.StatusBadRequest})
+		return
+	}
 	// We create the new instance of the microservice
-	globals.RegisteredMicroservices[body.Name][id] = globals.MicroserviceInstance{Port: services.GetNewPort()}
-	log.Printf("Registered microservice \"%v\" on port %v (uuid: %v)", body.Name, globals.RegisteredMicroservices[body.Name][id].Port, id)
+	globals.RegisteredMicroservices[body.Name][id] = globals.MicroserviceInstance{Port: newPort}
+	log.Printf("Registered microservice \"%v\" on port %v (uuid: %v)", body.Name, newPort, id)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(dto.RegisterMicroserviceResponse{
 		UUID: id,
-		Port: globals.RegisteredMicroservices[body.Name][id].Port,
+		Port: newPort,
 	})
 }

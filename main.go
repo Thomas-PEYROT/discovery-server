@@ -48,6 +48,7 @@ func main() {
 	if globals.PortRangeMin > globals.PortRangeMax {
 		log.Fatal("Error : Port range min should be greater than or equal to Port range max.")
 	}
+	fmt.Printf("Server Port Range: %d-%d (max %d instances).\n", globals.PortRangeMin, globals.PortRangeMax, globals.PortRangeMax-globals.PortRangeMin)
 
 	// Start server and register endpoints
 	http.HandleFunc("/register", routes.RegisterMicroservice)
