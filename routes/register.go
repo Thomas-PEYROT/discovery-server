@@ -3,8 +3,10 @@ package routes
 import (
 	"discovery-server/dto"
 	"discovery-server/globals"
+	"discovery-server/services"
 	"encoding/json"
 	"github.com/google/uuid"
+	"log"
 	"net/http"
 )
 
@@ -24,22 +26,18 @@ func RegisterMicroservice(w http.ResponseWriter, r *http.Request) {
 	id := uuid.New().String()
 
 	// If an instance (or more) of this microservice has already been created
-	if _, ok := globals.RegisteredMicroservices[body.Name]; ok {
-		// We create the new instance of the microservice
-		// TODO: Replace 5000 by a random port in a given range
-		globals.RegisteredMicroservices[body.Name][id] = globals.MicroserviceInstance{Port: 5000}
-	} else {
+	if _, ok := globals.RegisteredMicroservices[body.Name]; !ok {
 		// We register the new microservice
 		globals.RegisteredMicroservices[body.Name] = make(map[string]globals.MicroserviceInstance)
-
-		// We create the new instance of the microservice
-		// TODO: Replace 5000 by a random port in a given range
-		globals.RegisteredMicroservices[body.Name][id] = globals.MicroserviceInstance{Port: 5000}
 	}
+
+	// We create the new instance of the microservice
+	globals.RegisteredMicroservices[body.Name][id] = globals.MicroserviceInstance{Port: services.GetNewPort()}
+	log.Printf("Registered microservice \"%v\" on port %v (uuid: %v)", body.Name, globals.RegisteredMicroservices[body.Name][id].Port, id)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(dto.RegisterMicroserviceResponse{
 		UUID: id,
-		Port: 5000,
+		Port: globals.RegisteredMicroservices[body.Name][id].Port,
 	})
 }
