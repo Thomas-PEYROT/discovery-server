@@ -19,7 +19,8 @@ func main() {
 
 	port := os.Getenv("SERVER_PORT")
 
-	http.HandleFunc("/post", routes.RegisterMicroservice)
+	http.HandleFunc("/register", routes.RegisterMicroservice)
+	http.HandleFunc("/microservices", routes.GetAllMicroservices)
 	fmt.Printf("Started server on port %v\n", port)
 	http.ListenAndServe(":"+port, nil)
 }

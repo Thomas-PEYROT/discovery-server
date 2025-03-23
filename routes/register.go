@@ -1,33 +1,45 @@
 package routes
 
 import (
+	"discovery-server/dto"
+	"discovery-server/globals"
 	"encoding/json"
+	"github.com/google/uuid"
 	"net/http"
 )
 
-type PostRequest struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-}
-
-type PostResponse struct {
-	Message string `json:"message"`
-}
-
 func RegisterMicroservice(w http.ResponseWriter, r *http.Request) {
+	// Some checks
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method, should be POST", http.StatusMethodNotAllowed)
 		return
 	}
-
-	var req PostRequest
+	var body dto.RegisterMicroserviceBody
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&req); err != nil {
+	if err := decoder.Decode(&body); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	response := PostResponse{Message: "ok"}
+	id := uuid.New().String()
+
+	// If an instance (or more) of this microservice has already been created
+	if _, ok := globals.RegisteredMicroservices[body.Name]; ok {
+		// We create the new instance of the microservice
+		// TODO: Replace 5000 by a random port in a given range
+		globals.RegisteredMicroservices[body.Name][id] = globals.MicroserviceInstance{Port: 5000}
+	} else {
+		// We register the new microservice
+		globals.RegisteredMicroservices[body.Name] = make(map[string]globals.MicroserviceInstance)
+
+		// We create the new instance of the microservice
+		// TODO: Replace 5000 by a random port in a given range
+		globals.RegisteredMicroservices[body.Name][id] = globals.MicroserviceInstance{Port: 5000}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(dto.RegisterMicroserviceResponse{
+		UUID: id,
+		Port: 5000,
+	})
 }
