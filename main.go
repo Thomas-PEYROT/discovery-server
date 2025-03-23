@@ -52,6 +52,7 @@ func main() {
 
 	// Start server and register endpoints
 	http.HandleFunc("/register", routes.RegisterMicroservice)
+	http.HandleFunc("/unregister", routes.UnregisterMicroservice)
 	http.HandleFunc("/microservices", routes.GetAllMicroservices)
 	fmt.Printf("Started server on port %v\n", port)
 	http.ListenAndServe(fmt.Sprintf(":%v", port), nil)

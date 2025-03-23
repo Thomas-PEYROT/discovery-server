@@ -26,7 +26,7 @@ func RegisterMicroservice(w http.ResponseWriter, r *http.Request) {
 
 	id := uuid.New().String()
 
-	// If an instance (or more) of this microservice has already been created
+	// If an instance (or more) of this microservice hasn't already been created
 	if _, ok := globals.RegisteredMicroservices[body.Name]; !ok {
 		// We register the new microservice
 		globals.RegisteredMicroservices[body.Name] = make(map[string]globals.MicroserviceInstance)
@@ -38,6 +38,7 @@ func RegisterMicroservice(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(exceptions.HttpException{Message: err.Error(), StatusCode: http.StatusBadRequest})
 		return
 	}
+	
 	// We create the new instance of the microservice
 	globals.RegisteredMicroservices[body.Name][id] = globals.MicroserviceInstance{Port: newPort}
 	log.Printf("Registered microservice \"%v\" on port %v (uuid: %v)", body.Name, newPort, id)
