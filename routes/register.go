@@ -34,6 +34,7 @@ func RegisterMicroservice(w http.ResponseWriter, r *http.Request) {
 
 	newPort, err := services.GetNewPort()
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(exceptions.HttpException{Message: err.Error(), StatusCode: http.StatusBadRequest})
 		return
 	}
