@@ -28,6 +28,9 @@ func UnregisterMicroservice(w http.ResponseWriter, r *http.Request) {
 		if instance, ok := globals.RegisteredMicroservices[microservice][body.UUID]; ok {
 			// We remove the microservice
 			delete(globals.RegisteredMicroservices[microservice], body.UUID)
+			if len(globals.RegisteredMicroservices[microservice]) == 0 {
+				delete(globals.RegisteredMicroservices, microservice)
+			}
 			log.Printf("Unegistered microservice \"%v\" on port %v (uuid: %v)", microservice, instance.Port, body.UUID)
 			found = true
 		}
